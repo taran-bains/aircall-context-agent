@@ -27,7 +27,7 @@ def create_reranking_qa_chain():
     )
     
     # Reranker using LLM
-    llm_reranker = ChatAnthropic(temperature=0, model="claude-3-haiku-20240307")  # Cheaper for reranking
+    llm_reranker = ChatAnthropic(temperature=0, model="claude-haiku-4-5")  # Cheaper for reranking
     compressor = LLMChainExtractor.from_llm(llm_reranker)
     
     # Compression retriever = retrieval + reranking
@@ -55,7 +55,7 @@ Answer:"""
     )
     
     # Main LLM for generation
-    llm = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0)
+    llm = ChatAnthropic(model="claude-haiku-4-5", temperature=0)
     
     # QA chain with reranking retriever
     qa_chain = RetrievalQA.from_chain_type(

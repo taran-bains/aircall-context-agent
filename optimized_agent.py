@@ -46,7 +46,7 @@ Answer:"""
     
     # LLM with streaming
     llm = ChatAnthropic(
-        model="claude-3-sonnet-20240229",
+        model="claude-haiku-4-5",
         temperature=0,
         streaming=True,  # Enable streaming
         callbacks=[StreamingStdOutCallbackHandler()]  # Print as tokens arrive

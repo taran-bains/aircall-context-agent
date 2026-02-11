@@ -233,7 +233,7 @@ PROMPT = PromptTemplate(
 )
 
 # Create chain
-llm = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0)
+llm = ChatAnthropic(model="claude-haiku-4-5", temperature=0)
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
@@ -268,7 +268,7 @@ from langchain_anthropic import ChatAnthropic
 base_retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
 
 # Add LLM-based reranker
-llm = ChatAnthropic(temperature=0, model="claude-3-haiku-20240307")  # Cheaper model for reranking
+llm = ChatAnthropic(temperature=0, model="claude-haiku-4-5")  # Cheaper model for reranking
 compressor = LLMChainExtractor.from_llm(llm)
 
 # Compression retriever = retrieval + reranking

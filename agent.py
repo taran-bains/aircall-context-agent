@@ -45,7 +45,7 @@ Answer:"""
     )
     
     # Create LLM
-    llm = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0)
+    llm = ChatAnthropic(model="claude-haiku-4-5", temperature=0)
     
     # Create QA chain
     qa_chain = RetrievalQA.from_chain_type(
