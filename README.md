@@ -105,15 +105,18 @@ This demonstrates **true token-by-token streaming**:
 
 ### MCP Server
 
-Start the MCP server:
-```bash
-python mcp_server.py
-```
+The MCP server exposes two tools via the Model Context Protocol:
+- `search_calls` - Semantic search over call transcripts
+- `get_call_stats` - Get statistics (total, by agent, by category)
 
-In another terminal, test with the MCP client:
+**Test the server:**
 ```bash
 python mcp_client.py
 ```
+
+This starts the server as a subprocess and tests both tools.
+
+**Note**: The server uses stdio transport and expects JSON-RPC messages. Don't run `python mcp_server.py` directly - it will wait for input. Use the client or integrate with MCP-compatible tools like Claude Desktop or the MCP Inspector.
 
 ## Example Queries
 

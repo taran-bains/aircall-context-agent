@@ -1,8 +1,6 @@
-"""MCP Server exposing call search functionality."""
-import asyncio
+"""MCP Server exposing call search functionality using FastMCP."""
 import json
-from mcp.server import Server
-from mcp.types import Tool, TextContent
+from mcp.server.fastmcp import FastMCP
 from langchain_anthropic import ChatAnthropic
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
@@ -12,8 +10,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize server
-server = Server("aircall-context-server")
+# Initialize FastMCP server
+mcp = FastMCP("aircall-context-server")
 
 # Global QA chain (initialized on first use)
 _qa_chain = None
@@ -59,92 +57,75 @@ Answer:"""
     return _qa_chain
 
 
-@server.list_tools()
-async def list_tools():
-    """List available MCP tools."""
-    return [
-        Tool(
-            name="search_calls",
-            description="Search through Aircall call transcripts and metadata to answer questions about customer interactions, issues, agents, and trends.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "The question or search query about call data"
-                    }
-                },
-                "required": ["query"]
-            }
-        ),
-        Tool(
-            name="get_call_stats",
-            description="Get statistics about calls (total, by agent, by category, etc.)",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "stat_type": {
-                        "type": "string",
-                        "description": "Type of statistic: 'total', 'by_agent', 'by_category'",
-                        "enum": ["total", "by_agent", "by_category"]
-                    }
-                },
-                "required": ["stat_type"]
-            }
-        )
-    ]
-
-
-@server.call_tool()
-async def call_tool(name: str, arguments: dict):
-    """Handle MCP tool calls."""
-    if name == "search_calls":
-        query = arguments["query"]
-        qa_chain = get_qa_chain()
-        
-        # Run query
-        result = qa_chain.invoke({"query": query})
-        
-        # Format response
-        answer = result['result']
-        sources = [doc.metadata['call_id'] for doc in result['source_documents'][:3]]
-        
-        response = f"{answer}\n\nSources: {', '.join(sources)}"
-        
-        return [TextContent(type="text", text=response)]
+@mcp.tool()
+def search_calls(query: str) -> str:
+    """Search through Aircall call transcripts and metadata to answer questions about customer interactions, issues, agents, and trends.
     
-    elif name == "get_call_stats":
-        # Load calls directly from JSON for stats
-        with open("data/calls.json") as f:
-            calls = json.load(f)
+    Args:
+        query: The question or search query about call data
         
-        stat_type = arguments["stat_type"]
+    Returns:
+        Answer with sources from relevant call records
+    """
+    qa_chain = get_qa_chain()
+    
+    # Run query
+    result = qa_chain.invoke({"query": query})
+    
+    # Format response
+    answer = result['result']
+    sources = [doc.metadata['call_id'] for doc in result['source_documents'][:3]]
+    
+    response = f"{answer}\n\nSources: {', '.join(sources)}"
+    
+    return response
+
+
+@mcp.tool()
+def get_call_stats(stat_type: str) -> str:
+    """Get statistics about calls (total, by agent, by category, etc.).
+    
+    Args:
+        stat_type: Type of statistic - 'total', 'by_agent', or 'by_category'
         
-        if stat_type == "total":
-            stats = f"Total calls: {len(calls)}"
-        
-        elif stat_type == "by_agent":
-            agent_counts = {}
-            for call in calls:
-                agent = call['agent']
-                agent_counts[agent] = agent_counts.get(agent, 0) + 1
-            stats = "Calls by agent:\n" + "\n".join(
-                f"  {agent}: {count}" for agent, count in sorted(agent_counts.items())
-            )
-        
-        elif stat_type == "by_category":
-            category_counts = {}
-            for call in calls:
-                for tag in call['tags']:
-                    category_counts[tag] = category_counts.get(tag, 0) + 1
-            stats = "Calls by category:\n" + "\n".join(
-                f"  {cat}: {count}" for cat, count in sorted(category_counts.items())
-            )
-        
-        return [TextContent(type="text", text=stats)]
+    Returns:
+        Statistics about the calls
+    """
+    # Load calls directly from JSON for stats
+    with open("data/calls.json") as f:
+        calls = json.load(f)
+    
+    if stat_type == "total":
+        return f"Total calls: {len(calls)}"
+    
+    elif stat_type == "by_agent":
+        agent_counts = {}
+        for call in calls:
+            agent = call['agent']
+            agent_counts[agent] = agent_counts.get(agent, 0) + 1
+        stats = "Calls by agent:\n" + "\n".join(
+            f"  {agent}: {count}" for agent, count in sorted(agent_counts.items())
+        )
+        return stats
+    
+    elif stat_type == "by_category":
+        category_counts = {}
+        for call in calls:
+            for tag in call['tags']:
+                category_counts[tag] = category_counts.get(tag, 0) + 1
+        stats = "Calls by category:\n" + "\n".join(
+            f"  {cat}: {count}" for cat, count in sorted(category_counts.items())
+        )
+        return stats
+    
+    else:
+        return f"Unknown stat_type: {stat_type}. Use 'total', 'by_agent', or 'by_category'."
 
 
 if __name__ == "__main__":
-    print("🚀 Starting MCP server: aircall-context-server")
-    print("   Tools: search_calls, get_call_stats")
-    server.run()
+    import sys
+    # Use stderr for logging - stdout is reserved for JSON-RPC messages
+    print("🚀 Starting MCP server: aircall-context-server", file=sys.stderr)
+    print("   Tools: search_calls, get_call_stats", file=sys.stderr)
+    print("   Transport: stdio", file=sys.stderr)
+    mcp.run(transport="stdio")
