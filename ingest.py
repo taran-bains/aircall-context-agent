@@ -19,7 +19,7 @@ def load_calls(file_path: str = "data/calls.json") -> list[dict]:
 def create_documents(calls: list[dict]) -> list[Document]:
     """Convert call records to LangChain Documents."""
     documents = []
-    
+
     for call in calls:
         # Create rich text content
         content = f"""Call ID: {call['call_id']}
@@ -35,21 +35,21 @@ Resolved: {'Yes' if call['resolved'] else 'No'}
 Transcript:
 {call['transcript']}
 """
-        
+
         # Create document with metadata
         doc = Document(
             page_content=content,
             metadata={
                 "call_id": call['call_id'],
                 "agent": call['agent'],
-                "tags": call['tags'],
+                "tags": ", ".join(call['tags']),
                 "sentiment": call['sentiment'],
                 "resolved": call['resolved'],
                 "timestamp": call['timestamp'],
             }
         )
         documents.append(doc)
-    
+
     return documents
 
 
@@ -58,24 +58,24 @@ def main():
     print("🔄 Loading call data...")
     calls = load_calls()
     print(f"   Loaded {len(calls)} calls")
-    
+
     print("\n📝 Converting to documents...")
     documents = create_documents(calls)
     print(f"   Created {len(documents)} documents")
-    
+
     print("\n🧮 Creating embeddings and vector store...")
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-    
+
     # Create vector store with persistence
     vectorstore = Chroma.from_documents(
         documents=documents,
         embedding=embeddings,
         persist_directory="./chroma_db"
     )
-    
+
     print(f"✅ Ingested {len(documents)} documents into ChromaDB")
     print(f"📁 Vector store saved to ./chroma_db/")
-    
+
     # Test a simple query
     print("\n🔍 Testing retrieval...")
     query = "What billing issues were reported?"

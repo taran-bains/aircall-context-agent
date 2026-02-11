@@ -23,7 +23,7 @@ def create_reranking_qa_chain():
     # Base retriever (get more docs initially)
     base_retriever = vectorstore.as_retriever(
         search_type="similarity",
-        search_kwargs={"k": 10}  # Retrieve top 10 initially
+        search_kwargs={"k": 15}  # Retrieve top 15 initially for reranking
     )
     
     # Reranker using LLM
@@ -39,13 +39,19 @@ def create_reranking_qa_chain():
     # Prompt template
     prompt_template = """You are an AI assistant analyzing Aircall call data.
 
+IMPORTANT LIMITATIONS:
+- You receive the top 10-15 most relevant call records after retrieval and reranking
+- For counting queries (e.g., "which agent handled the most calls"), you can only see these records, not the full dataset
+- Acknowledge this limitation if a query requires full dataset access for accurate results
+- For semantic search queries, the reranking system prioritizes the most relevant records
+
 Use these call records to answer the question:
 
 {context}
 
 Question: {question}
 
-Provide a detailed answer citing specific call IDs and agents when relevant.
+Provide a detailed answer citing specific call IDs and agents when relevant. If the query requires full dataset visibility, note this limitation.
 
 Answer:"""
     

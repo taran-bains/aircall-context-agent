@@ -27,11 +27,13 @@ def create_optimized_qa_chain():
     # Retriever
     retriever = vectorstore.as_retriever(
         search_type="similarity",
-        search_kwargs={"k": 5}
+        search_kwargs={"k": 10}
     )
     
     # Prompt
     prompt_template = """Analyze these Aircall call records:
+
+IMPORTANT: You are seeing the top 10 most semantically relevant call records. For counting/aggregation queries, acknowledge that you can only see a subset of the data.
 
 {context}
 

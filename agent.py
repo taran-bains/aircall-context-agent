@@ -18,15 +18,21 @@ def create_qa_chain():
         persist_directory="./chroma_db",
         embedding_function=embeddings
     )
-    
+
     # Create retriever
     retriever = vectorstore.as_retriever(
         search_type="similarity",
-        search_kwargs={"k": 5}  # Retrieve top 5 documents
+        search_kwargs={"k": 10}  # Retrieve top 10 documents
     )
-    
+
     # Custom prompt template
     prompt_template = """You are an AI assistant helping analyze Aircall call data.
+
+IMPORTANT LIMITATIONS:
+- You are provided with the top 10 most relevant call records based on semantic similarity to the query
+- For counting/aggregation queries (e.g., "which agent handled the most calls"), you can only see these 10 records, not the entire dataset
+- If a query requires seeing all records for accurate counting, acknowledge this limitation
+- For semantic search queries (e.g., "what billing issues were reported"), the retrieval system should find the most relevant records
 
 Use the following call records to answer the question. Be specific and cite call IDs when relevant.
 
@@ -35,18 +41,18 @@ Call Records:
 
 Question: {question}
 
-Answer based on the call data above. If you don't have enough information, say so clearly.
+Answer based on the call data above. If you don't have enough information or if the query requires full dataset access for accurate results, say so clearly.
 
 Answer:"""
-    
+
     PROMPT = PromptTemplate(
         template=prompt_template,
         input_variables=["context", "question"]
     )
-    
+
     # Create LLM
     llm = ChatAnthropic(model="claude-haiku-4-5", temperature=0)
-    
+
     # Create QA chain
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
@@ -55,7 +61,7 @@ Answer:"""
         return_source_documents=True,
         chain_type_kwargs={"prompt": PROMPT}
     )
-    
+
     return qa_chain
 
 
@@ -64,7 +70,7 @@ def main():
     print("🤖 Initializing RAG agent...")
     qa_chain = create_qa_chain()
     print("✅ Agent ready\n")
-    
+
     # Sample queries
     queries = [
         "What billing issues have customers reported?",
@@ -72,17 +78,17 @@ def main():
         "What call quality problems were mentioned?",
         "Show me unresolved issues",
     ]
-    
+
     for query in queries:
         print(f"\n{'='*60}")
         print(f"Q: {query}")
         print(f"{'='*60}")
-        
+
         result = qa_chain.invoke({"query": query})
-        
+
         print(f"\nA: {result['result']}")
         print(f"\n📄 Sources:")
-        for i, doc in enumerate(result['source_documents'][:3], 1):
+        for i, doc in enumerate(result['source_documents'][:10], 1):
             print(f"   {i}. {doc.metadata['call_id']} (Agent: {doc.metadata['agent']})")
 
 

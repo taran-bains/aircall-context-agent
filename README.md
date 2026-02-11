@@ -110,10 +110,18 @@ python mcp_client.py
 
 ## Example Queries
 
+### Best Suited for RAG (Semantic Search):
 - "What billing issues have customers reported?"
-- "Which agent handled the most calls?"
 - "What call quality problems were mentioned?"
-- "Show me calls from the last week"
+- "Show me calls about integration issues"
+- "What technical problems have been escalated?"
+
+### Limited Accuracy (Requires Full Dataset):
+- "Which agent handled the most calls?" ⚠️
+- "How many unresolved issues are there?" ⚠️
+- "Show me all calls from the last week" ⚠️
+
+**Note:** RAG retrieves the top 10-15 most relevant documents, which is excellent for semantic search but may not provide accurate counts/aggregations across the entire dataset.
 
 ## Tech Stack
 
@@ -144,6 +152,26 @@ aircall-context-agent/
 └── chroma_db/               # ChromaDB vector store (created by ingest.py)
 ```
 
+## Architecture Considerations
+
+### When RAG Works Well ✅
+- **Semantic search queries**: Finding documents by meaning, not exact keywords
+- **Exploratory questions**: "What issues were reported about X?"
+- **Context-based answers**: Synthesizing information from relevant documents
+
+### When RAG Has Limitations ⚠️
+- **Counting/aggregation**: "How many calls did each agent handle?"
+- **Exhaustive listings**: "Show me ALL unresolved issues"
+- **Statistical analysis**: Requires seeing the full dataset
+
+### Solution Approaches
+For production systems, you'd typically use:
+1. **RAG for semantic search** (as implemented here)
+2. **Direct database queries** for counting/aggregation
+3. **Hybrid approach** where the LLM decides which tool to use based on the query type
+
+The MCP server's `get_call_stats` tool demonstrates this hybrid approach.
+
 ## Why This Project?
 
 This demonstrates hands-on experience with:
@@ -155,6 +183,7 @@ This demonstrates hands-on experience with:
 - **Reranking**: Improving retrieval relevance beyond vector similarity
 - **MCP**: Modern protocol for AI-tool integration
 - **Performance Optimization**: Caching, streaming, batch processing
+- **Understanding Trade-offs**: Knowing when RAG works and when it doesn't
 
 ## Next Steps
 

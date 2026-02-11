@@ -29,9 +29,11 @@ def get_qa_chain():
             embedding_function=embeddings
         )
         
-        retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
         
         prompt_template = """Use these call records to answer:
+
+NOTE: You are seeing the top 10 most relevant call records. For queries requiring full dataset visibility (counting, aggregations), note this limitation.
 
 {context}
 
