@@ -21,7 +21,8 @@ AI agent for searching and analyzing Aircall call data using RAG (Retrieval-Augm
 [LangChain RAG Agent]
   - Retriever (top-k similarity)
   - Reranker (LLM-based relevance)
-  - Generator (GPT-4)
+  - Generator (Claude 4.5 Haiku)
+  - Embeddings (Local: all-MiniLM-L6-v2)
     ↓
 [MCP Server (exposes tools)]
     ↓
@@ -33,7 +34,7 @@ AI agent for searching and analyzing Aircall call data using RAG (Retrieval-Augm
 ### Prerequisites
 
 - Python 3.11+
-- OpenAI API key
+- Anthropic API key (for Claude 4.5 Haiku)
 
 ### Installation
 
@@ -50,7 +51,7 @@ pip install -r requirements.txt
 
 # Create .env file
 cp .env.example .env
-# Add your OPENAI_API_KEY to .env
+# Add your ANTHROPIC_API_KEY to .env
 ```
 
 ### Generate Data
@@ -118,7 +119,8 @@ python mcp_client.py
 
 - **LangChain** 0.1.x - AI agent framework
 - **ChromaDB** 0.4.x - Vector database
-- **OpenAI API** - GPT-4 for generation, embeddings
+- **Anthropic API** - Claude 4.5 Haiku for generation and reranking
+- **HuggingFace** - Local embeddings (`all-MiniLM-L6-v2`)
 - **MCP SDK** - Model Context Protocol
 - **Python** 3.11+
 
@@ -148,7 +150,8 @@ This demonstrates hands-on experience with:
 
 - **LangChain**: Framework for building AI agents
 - **RAG**: Combining retrieval with generation for better accuracy
-- **Vector Databases**: Semantic search over unstructured data
+- **Local Embeddings**: Privacy-first, cost-efficient semantic search using local models
+- **Claude 4.5 Haiku**: High-performance, fast, and cost-efficient generation
 - **Reranking**: Improving retrieval relevance beyond vector similarity
 - **MCP**: Modern protocol for AI-tool integration
 - **Performance Optimization**: Caching, streaming, batch processing
