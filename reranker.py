@@ -1,5 +1,6 @@
 """RAG agent with LLM-based reranking for improved accuracy."""
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
@@ -13,7 +14,7 @@ load_dotenv()
 def create_reranking_qa_chain():
     """Create QA chain with reranking."""
     # Load vector store
-    embeddings = OpenAIEmbeddings()
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vectorstore = Chroma(
         persist_directory="./chroma_db",
         embedding_function=embeddings
@@ -26,7 +27,7 @@ def create_reranking_qa_chain():
     )
     
     # Reranker using LLM
-    llm_reranker = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")  # Cheaper for reranking
+    llm_reranker = ChatAnthropic(temperature=0, model="claude-3-haiku-20240307")  # Cheaper for reranking
     compressor = LLMChainExtractor.from_llm(llm_reranker)
     
     # Compression retriever = retrieval + reranking
@@ -54,7 +55,7 @@ Answer:"""
     )
     
     # Main LLM for generation
-    llm = ChatOpenAI(model="gpt-4", temperature=0)
+    llm = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0)
     
     # QA chain with reranking retriever
     qa_chain = RetrievalQA.from_chain_type(

@@ -71,7 +71,7 @@ mkdir aircall-context-agent
 cd aircall-context-agent
 python -m venv venv
 source venv/bin/activate
-pip install langchain chromadb openai python-dotenv
+pip install langchain-anthropic langchain-community sentence-transformers chromadb python-dotenv
 ```
 
 Create `.env`:
@@ -149,7 +149,7 @@ with open("data/calls.json", "w") as f:
 # ingest.py
 import json
 from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.schema import Document
 
 # Load calls
@@ -180,7 +180,7 @@ Tags: {', '.join(call['tags'])}
     documents.append(doc)
 
 # Create vector store
-embeddings = OpenAIEmbeddings()
+embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 vectorstore = Chroma.from_documents(
     documents,
     embeddings,
@@ -197,13 +197,13 @@ Run: `python ingest.py`
 ```python
 # agent.py
 from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_anthropic import ChatAnthropic
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 
 # Load vector store
-embeddings = OpenAIEmbeddings()
+embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 vectorstore = Chroma(
     persist_directory="./chroma_db",
     embedding_function=embeddings
@@ -233,7 +233,7 @@ PROMPT = PromptTemplate(
 )
 
 # Create chain
-llm = ChatOpenAI(model="gpt-4", temperature=0)
+llm = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0)
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
@@ -262,13 +262,13 @@ Run: `python agent.py`
 # reranker.py
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import LLMChainExtractor
-from langchain.chat_models import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 
 # Create base retriever (same as before)
 base_retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
 
 # Add LLM-based reranker
-llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")  # Cheaper model for reranking
+llm = ChatAnthropic(temperature=0, model="claude-3-haiku-20240307")  # Cheaper model for reranking
 compressor = LLMChainExtractor.from_llm(llm)
 
 # Compression retriever = retrieval + reranking
@@ -304,7 +304,7 @@ from langchain.callbacks import StreamingStdOutCallbackHandler
 set_llm_cache(InMemoryCache())
 
 # Enable streaming (show results as they come)
-llm = ChatOpenAI(
+llm = ChatAnthropic(
     model="gpt-4",
     temperature=0,
     streaming=True,
@@ -470,7 +470,8 @@ python mcp_client.py
 
 - LangChain 0.1.x
 - ChromaDB 0.4.x
-- OpenAI API (GPT-4)
+- Anthropic API (Claude 3 Sonnet/Haiku)
+- HuggingFace (Local Embeddings)
 - MCP SDK
 - Python 3.11+
 ```

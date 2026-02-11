@@ -3,7 +3,8 @@ import asyncio
 import json
 from mcp.server import Server
 from mcp.types import Tool, TextContent
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
@@ -22,7 +23,7 @@ def get_qa_chain():
     """Lazy initialization of QA chain."""
     global _qa_chain
     if _qa_chain is None:
-        embeddings = OpenAIEmbeddings()
+        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         vectorstore = Chroma(
             persist_directory="./chroma_db",
             embedding_function=embeddings
@@ -43,7 +44,7 @@ Answer:"""
             input_variables=["context", "question"]
         )
         
-        llm = ChatOpenAI(model="gpt-4", temperature=0)
+        llm = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0)
         
         _qa_chain = RetrievalQA.from_chain_type(
             llm=llm,

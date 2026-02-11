@@ -1,5 +1,6 @@
 """Performance-optimized RAG agent with caching and streaming."""
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
@@ -17,7 +18,7 @@ set_llm_cache(InMemoryCache())
 def create_optimized_qa_chain():
     """Create optimized QA chain with caching and streaming."""
     # Load vector store
-    embeddings = OpenAIEmbeddings()
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vectorstore = Chroma(
         persist_directory="./chroma_db",
         embedding_function=embeddings
@@ -44,8 +45,8 @@ Answer:"""
     )
     
     # LLM with streaming
-    llm = ChatOpenAI(
-        model="gpt-4",
+    llm = ChatAnthropic(
+        model="claude-3-sonnet-20240229",
         temperature=0,
         streaming=True,  # Enable streaming
         callbacks=[StreamingStdOutCallbackHandler()]  # Print as tokens arrive

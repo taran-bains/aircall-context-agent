@@ -1,7 +1,7 @@
 """Ingest call data into ChromaDB vector store."""
 import json
 from pathlib import Path
-from langchain_openai import OpenAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain.schema import Document
 from dotenv import load_dotenv
@@ -64,7 +64,7 @@ def main():
     print(f"   Created {len(documents)} documents")
     
     print("\n🧮 Creating embeddings and vector store...")
-    embeddings = OpenAIEmbeddings()
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     
     # Create vector store with persistence
     vectorstore = Chroma.from_documents(
