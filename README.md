@@ -7,16 +7,16 @@ AI agent for searching and analyzing Aircall call data using RAG (Retrieval-Augm
 - ✅ **RAG Architecture** with ChromaDB vector store
 - ✅ **LangChain** framework for agent orchestration
 - ✅ **Reranking** for improved retrieval accuracy
-- ✅ **Performance Optimization** (caching, streaming)
+- ✅ **Performance Optimization** (streaming, caching)
 - ✅ **MCP Server** exposing call search tools
 - ✅ **Fake call data** for demonstration
 
 ## Architecture
 
 ```
-[Fake Call Data (JSON)] 
+[Fake Call Data (JSON)]
     ↓
-[ChromaDB Vector Store] 
+[ChromaDB Vector Store]
     ↓
 [LangChain RAG Agent]
   - Retriever (top-k similarity)
@@ -88,13 +88,20 @@ python reranker.py
 
 This adds LLM-based reranking to improve retrieval accuracy.
 
-### Optimized Agent
+### Optimized Agent (with Streaming)
 
 ```bash
 python optimized_agent.py
 ```
 
-This includes caching and streaming for better performance.
+This demonstrates **true token-by-token streaming**:
+- Bypasses RetrievalQA's buffering by manually retrieving docs and streaming from LLM
+- Tokens appear in real-time as Claude generates them
+- Much lower perceived latency compared to waiting for full response
+
+**Streaming modes:**
+- **Normal**: `python optimized_agent.py` - Full speed streaming
+- **Slow motion**: `python optimized_agent.py --slow` - Adds 10ms delay between tokens to visually demonstrate streaming
 
 ### MCP Server
 
@@ -182,7 +189,7 @@ This demonstrates hands-on experience with:
 - **Claude 4.5 Haiku**: High-performance, fast, and cost-efficient generation
 - **Reranking**: Improving retrieval relevance beyond vector similarity
 - **MCP**: Modern protocol for AI-tool integration
-- **Performance Optimization**: Caching, streaming, batch processing
+- **Performance Optimization**: Token streaming for lower latency, LLM response caching
 - **Understanding Trade-offs**: Knowing when RAG works and when it doesn't
 
 ## Next Steps
