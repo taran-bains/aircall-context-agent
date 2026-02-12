@@ -86,8 +86,10 @@ def main():
     qa_chain = create_reranking_qa_chain()
     print("✅ Agent ready (with LLM-based reranking)\n")
 
+    # Standard queries for comparison across agents
     queries = [
-        "What are the most common customer complaints?",
+        "What billing issues have customers reported?",
+        "What are the main customer pain points?",
         "Which calls were marked as unresolved?",
         "What technical issues have been reported recently?",
     ]

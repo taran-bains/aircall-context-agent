@@ -78,7 +78,7 @@ This embeds the calls and stores them in ChromaDB (`./chroma_db/`).
 python agent.py
 ```
 
-This runs sample queries against the call data.
+This runs the basic RAG pipeline with standard queries. Uses top-10 retrieval without reranking.
 
 ### With Reranking
 
@@ -86,7 +86,7 @@ This runs sample queries against the call data.
 python reranker.py
 ```
 
-This adds LLM-based reranking to improve retrieval accuracy.
+This adds LLM-based reranking. Retrieves top-15, reranks with Claude, keeps most relevant.
 
 ### Optimized Agent (with Streaming)
 
@@ -102,6 +102,16 @@ This demonstrates **true token-by-token streaming**:
 **Streaming modes:**
 - **Normal**: `python optimized_agent.py` - Full speed streaming
 - **Slow motion**: `python optimized_agent.py --slow` - Adds 10ms delay between tokens to visually demonstrate streaming
+
+### Comparing Approaches
+
+All three agents use **the same set of queries** for easy comparison:
+1. "What billing issues have customers reported?"
+2. "What are the main customer pain points?"
+3. "Which calls were marked as unresolved?"
+4. "What technical issues have been reported recently?"
+
+Run all three to see how reranking affects results and how streaming improves user experience!
 
 ### MCP Server
 

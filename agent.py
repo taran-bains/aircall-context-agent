@@ -71,12 +71,12 @@ def main():
     qa_chain = create_qa_chain()
     print("✅ Agent ready\n")
 
-    # Sample queries
+    # Standard queries for comparison across agents
     queries = [
         "What billing issues have customers reported?",
-        "Which agent handled the most calls?",
-        "What call quality problems were mentioned?",
-        "Show me unresolved issues",
+        "What are the main customer pain points?",
+        "Which calls were marked as unresolved?",
+        "What technical issues have been reported recently?",
     ]
 
     for query in queries:

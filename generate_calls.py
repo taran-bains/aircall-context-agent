@@ -10,26 +10,22 @@ TOPICS = {
         "Customer called about incorrect billing charges on their account.",
         "Billing inquiry regarding invoice discrepancies. Resolved by adjusting charges.",
         "Customer requested refund for unused credits. Processed successfully.",
+        # Distractor: Positive billing mention (vector search will find this, reranker should filter for "issues")
+        "Customer called to praise the clear billing format. Very happy with the new invoice design.", 
     ],
     "technical": [
         "Technical support call. Customer experiencing call quality issues. Suggested network troubleshooting.",
         "Customer unable to connect to phone system. Reset credentials and resolved.",
         "Integration issues with Salesforce. Walked through OAuth setup.",
-    ],
-    "feature_request": [
-        "Customer requested call recording feature. Added to product roadmap.",
-        "Asked about AI call summaries feature. Explained upcoming Voice Agent product.",
-        "Feature request for better analytics dashboard. Noted feedback.",
-    ],
-    "account_setup": [
-        "New customer onboarding call. Set up their first phone numbers and users.",
-        "Account upgrade from Basic to Pro plan. Migrated successfully.",
-        "Customer adding 10 new team members. Provisioned accounts.",
+        # Distractor: Technical discussion but not a problem
+        "Technical discussion about API capabilities. Customer is building a custom integration.",
     ],
     "call_quality": [
         "Customer reporting echo on calls. Diagnosed network latency issue.",
         "Call drop issues during peak hours. Escalated to engineering team.",
         "Audio quality degradation. Recommended bandwidth upgrade.",
+        # Distractor: Feature discussion, not a quality problem
+        "Sales call demonstrating high call quality features. Customer was impressed by the audio clarity.",
     ],
 }
 
@@ -74,6 +70,50 @@ def main():
     # Generate 20 calls
     num_calls = 20
     calls = [generate_call(i) for i in range(1, num_calls + 1)]
+    
+    # FORCE DISTRACTORS: Overwrite first 3 calls to ensure we have tricky cases
+    
+    # 1. Distractor: "Frustration" keyword but POSITIVE context
+    calls[0] = {
+        "call_id": "call_001_pos_frustration",
+        "from": "+1-555-0001",
+        "to": "+1-555-0200",
+        "duration": 120,
+        "timestamp": datetime.now().isoformat(),
+        "transcript": "Customer expressed frustration that they couldn't upgrade fast enough because they love the service so much. Wants Enterprise plan immediately.",
+        "tags": ["upgrade", "sales"],
+        "agent": "Sarah",
+        "sentiment": "positive",
+        "resolved": True,
+    }
+    
+    # 2. Distractor: "Angry" keyword but irrelevant context (movie discussion)
+    calls[1] = {
+        "call_id": "call_002_irrelevant",
+        "from": "+1-555-0002",
+        "to": "+1-555-0200",
+        "duration": 180,
+        "timestamp": datetime.now().isoformat(),
+        "transcript": "Agent and customer chatted about an angry movie character while waiting for system to load. Friendly conversation.",
+        "tags": ["chitchat"],
+        "agent": "Mike",
+        "sentiment": "positive",
+        "resolved": True,
+    }
+    
+    # 3. Real Issue: Actual frustration/anger
+    calls[2] = {
+        "call_id": "call_003_real_anger",
+        "from": "+1-555-0003",
+        "to": "+1-555-0200",
+        "duration": 240,
+        "timestamp": datetime.now().isoformat(),
+        "transcript": "Customer is furious about recurring downtime. Threatened to cancel contract if not fixed today.",
+        "tags": ["technical", "churn_risk"],
+        "agent": "Chris",
+        "sentiment": "negative",
+        "resolved": False,
+    }
     
     # Save to JSON
     output_file = data_dir / "calls.json"
