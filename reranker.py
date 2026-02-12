@@ -1,4 +1,5 @@
 """RAG agent with LLM-based reranking for improved accuracy."""
+import warnings
 from langchain_anthropic import ChatAnthropic
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
@@ -9,6 +10,10 @@ from langchain.retrievers.document_compressors import LLMChainExtractor
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Suppress LangChain deprecation warning for LLMChainExtractor
+# The predict_and_parse deprecation is internal to LangChain and doesn't affect functionality
+warnings.filterwarnings("ignore", category=UserWarning, module="langchain")
 
 
 def create_reranking_qa_chain():
